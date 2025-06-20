@@ -3,7 +3,7 @@
   --accent: #7fc571;
   --bg: #f5f7fa;
   --text: #333;
-  --hover-bg: #2f1444;
+  --hover-bg: #4d8fe0;
   --hover-accent: #ffffff;
 }
 
@@ -13,7 +13,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -51,7 +51,7 @@ header {
 }
 
 .logo {
-  height: 100px;
+  height: 160px;
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 .logo:hover {
@@ -74,6 +74,9 @@ nav ul li a {
   padding: 0.5rem;
   border-radius: 4px;
   transition: background-color 0.3s ease;
+  font-size: 25px;
+  font-family: sans-serif;
+  color: #2c77cc;
 }
 nav ul li a:hover {
   background-color: #f0f0f0;
@@ -117,9 +120,9 @@ input:focus, textarea:focus {
 }
 
 button {
-  font-family: "Times New Roman", Times, serif;
+  font-family: sans-serif;
   padding: 0.75rem;
-  background-color: #2f1444;
+  background-color: #2c77cc;
   color: white;
   border: none;
   border-radius: 5px;
@@ -129,7 +132,7 @@ button {
 }
 
 button:hover {
-  background-color: #452363;
+  background-color: #4d8fe0;
   transform: translateY(-2px) scale(1.03);
   color: white;
 }
@@ -171,7 +174,7 @@ footer {
 .footer-links a:link,
 .footer-links a:visited,
 .footer-links a:active {
-  color: #2f1444;
+  color: #2c77cc;
   text-decoration: none;
   font-weight: bold;
   transition: all 0.3s ease;
@@ -244,7 +247,7 @@ footer {
 }
 
 .hamburger:hover {
-  background-color: #2f1444;
+  background-color: #2c77cc;
   color: white;
 }
 @media (max-width: 768px) {
@@ -305,10 +308,10 @@ footer {
 }
 
 .footer-contact-form button {
-  font-family: "Times New Roman", Times, serif;
+  font-family: sans-serif;
   width: 100%;
   padding: 7.5px;                /* 75% of 10px */
-  background-color: #341f53;
+  background-color: #2c77cc;
   color: white;
   border: none;
   border-radius: 5px;
@@ -316,7 +319,7 @@ footer {
 }
 
 .footer-contact-form button:hover {
-  background-color: #27163e;
+  background-color: #4d8fe0;
 }
 
 .footer-flex {
@@ -412,7 +415,7 @@ footer {
   width: 110px;
   height: 110px;
   border-radius: 50%;
-  box-shadow: 0 4px 0 0 #2e1b41;
+  box-shadow: 0 4px 0 0 #2c77cc;
   position: absolute;
   top: 20px;
   left: 20px;
@@ -474,7 +477,7 @@ footer {
 .refund-policy h3 {
   margin-top: 30px;
   font-size: 22px;
-  border-left: 4px solid #4CAF50;
+  border-left: 4px solid #2c77cc;
   padding-left: 12px;
   color: #222;
 }
@@ -496,7 +499,7 @@ footer {
 }
 
 .refund-policy a {
-  color: #4CAF50;
+  color: #2c77cc;
   font-weight: bold;
   text-decoration: none;
 }
