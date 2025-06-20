@@ -70,7 +70,7 @@ exports.handler = async (event) => {
         Step it Up Learning<br>
         <a href="mailto:info@stepituplearning.ca">info@stepituplearning.ca</a><br>
         <a href="https://stepituplearning.ca">stepituplearning.ca</a><br>
-        <img src="https://stepituplearning.ca/assets/logo.png" alt="Step it Up Learning Logo" style="height: 80px;">
+        <img src="https://stepituplearning.ca/assets/logo.png" alt="Step it Up Learning Logo" style="height: 160px;">
       </div>
     `;
 
