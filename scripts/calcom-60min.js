@@ -7,4 +7,4 @@ Cal("init", "60min", {origin:"https://cal.com"});
   // data-cal-namespace="60min"
   // `data-cal-config='{"layout":"month_view"}'`
 
-  Cal.ns["60min"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#292929"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
+  Cal.ns["60min"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#2c77cc"},"dark":{"cal-brand":"#fafafa"}},"hideEventTypeDetails":false,"layout":"month_view"});
