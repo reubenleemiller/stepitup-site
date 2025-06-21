@@ -1,5 +1,4 @@
 exports.handler = async function (event, context) {
-  // Use native fetch in Node 18+ or dynamic import if needed
   const fetch = global.fetch || (await import("node-fetch")).default;
 
   const API_KEY = process.env.CAL_API_KEY;
@@ -17,28 +16,26 @@ exports.handler = async function (event, context) {
     };
   }
 
-  // Parse query params or use defaults
-  const queryParams = event.queryStringParameters || {};
-  const username = "rebeccamiller";   // your username
-  const eventTypeSlug = "60min-check"; // your event slug
-  const start = queryParams.start || new Date().toISOString().slice(0, 10); // YYYY-MM-DD today
-  const end = queryParams.end || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10); // +14 days
-  const timeZone = queryParams.timeZone || "America/Chicago";
+  const start = "2025-06-21";
+  const end = "2025-07-05";
+  const timeZone = "America/Chicago";
 
-  // Build URL with search params
-  const url = new URL("https://api.cal.com/v2/slots");
-  url.searchParams.set("username", username);
-  url.searchParams.set("eventTypeSlug", eventTypeSlug);
-  url.searchParams.set("start", start);
-  url.searchParams.set("end", end);
-  url.searchParams.set("timeZone", timeZone);
+  const payload = {
+    username: "rebeccamiller",
+    eventTypeSlug: "60min-check",
+    start,
+    end,
+    timeZone,
+  };
 
   try {
-    const response = await fetch(url.toString(), {
-      method: "GET",
+    const response = await fetch("https://api.cal.com/v2/slots", {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
     });
 
     const text = await response.text();
@@ -54,7 +51,6 @@ exports.handler = async function (event, context) {
 
     const data = JSON.parse(text);
 
-    // Return the raw slots data to frontend to parse & display
     return {
       statusCode: 200,
       body: JSON.stringify(data),
