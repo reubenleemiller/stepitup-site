@@ -7,30 +7,37 @@ exports.handler = async function (event, context) {
   // Get today's date in YYYY-MM-DD format
   const today = new Date();
   const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
   const dd = String(today.getDate()).padStart(2, '0');
   const startDate = `${yyyy}-${mm}-${dd}`;
 
-  const body = JSON.parse(event.body || "{}");
+  // Set end date 2 weeks from today (optional)
+  const endDateObj = new Date();
+  endDateObj.setDate(endDateObj.getDate() + 14);
+  const yyyyEnd = endDateObj.getFullYear();
+  const mmEnd = String(endDateObj.getMonth() + 1).padStart(2, '0');
+  const ddEnd = String(endDateObj.getDate()).padStart(2, '0');
+  const endDate = `${yyyyEnd}-${mmEnd}-${ddEnd}`;
 
-  const payload = {
-    username: body.username || "rebeccamiller",
-    eventTypeSlug: body.eventTypeSlug || "60min-check",
-    start: startDate, // <-- use dynamic today date here
-    end: body.end || "2025-07-05", // you can also dynamically set end if you want
-    timeZone: body.timeZone || "America/Chicago"
-  };
+  // Use query params instead of body for GET
+  const params = new URLSearchParams({
+    username: 'rebeccamiller',
+    eventTypeSlug: '60min-check',
+    start: startDate,
+    end: endDate,
+    timeZone: 'America/Chicago'
+  });
 
-  console.log("Sending payload:", JSON.stringify(payload, null, 2));
+  const url = `https://api.cal.com/v2/slots?${params.toString()}`;
+
+  console.log("Constructed URL:", url);
 
   try {
-    const res = await fetch("https://api.cal.com/v2/availability/slots", {
-      method: "POST",
+    const res = await fetch(url, {
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.CAL_API_KEY}`
-      },
-      body: JSON.stringify(payload)
+      }
     });
 
     const text = await res.text();
