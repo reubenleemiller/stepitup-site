@@ -1,82 +1,60 @@
-const fetch = require("node-fetch");
+exports.handler = async function (event, context) {
+  console.log("Received request to get availability");
 
-const CAL_API_KEY = process.env.CAL_API_KEY;
-const USERNAME = "rebeccamiller";
-const SLUG = "60min-check";
-const TIMEZONE = "America/Chicago";
-const START_DATE = "2025-06-21";
-const END_DATE = "2025-07-05";
+  const fetch = (...args) =>
+    import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-async function getEventTypeId(username, slug) {
-  const url = `https://api.cal.com/v2/event-types?username=${username}`;
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const dd = String(today.getDate()).padStart(2, '0');
+  const startDate = `${yyyy}-${mm}-${dd}`;
 
-  console.info("Fetching event types for:", username);
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${CAL_API_KEY}`,
-    },
-  });
+  const body = JSON.parse(event.body || "{}");
 
-  if (!res.ok) {
-    console.error("Failed to fetch event types:", res.status);
-    const err = await res.text();
-    console.error(err);
-    throw new Error("Failed to fetch event types");
-  }
-
-  const data = await res.json();
-  const match = data.find((event) => event.slug === slug);
-  if (!match) {
-    console.error("Event type slug not found:", slug);
-    throw new Error("Event type not found");
-  }
-
-  console.info("Found eventTypeId:", match.id);
-  return match.id;
-}
-
-async function getAvailability(eventTypeId) {
-  const url = "https://api.cal.com/v2/booking/slots";
-  const body = {
-    eventTypeId,
-    startDate: START_DATE,
-    endDate: END_DATE,
-    timeZone: TIMEZONE,
+  const payload = {
+    username: body.username || "rebeccamiller",
+    eventTypeSlug: body.eventTypeSlug || "60min-check",
+    start: startDate, // <-- use dynamic today date here
+    end: body.end || "2025-07-05", // you can also dynamically set end if you want
+    timeZone: body.timeZone || "America/Chicago"
   };
 
-  console.info("Requesting availability with payload:", JSON.stringify(body));
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${CAL_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
+  console.log("Sending payload:", JSON.stringify(payload, null, 2));
 
-  const raw = await res.text();
-  console.info("Raw Cal.com API response:", raw);
-
-  if (!res.ok) {
-    console.error("Cal.com API error:", res.status, raw);
-    throw new Error("Failed to fetch availability");
-  }
-
-  const data = JSON.parse(raw);
-  console.info("Available slots:", data);
-  return data;
-}
-
-async function main() {
   try {
-    const eventTypeId = await getEventTypeId(USERNAME, SLUG);
-    const slots = await getAvailability(eventTypeId);
+    const res = await fetch("https://api.cal.com/v2/availability/slots", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.CAL_API_KEY}`
+      },
+      body: JSON.stringify(payload)
+    });
 
-    // You can render or use slots here
-    console.log("Success:", slots);
-  } catch (err) {
-    console.error("Unhandled error:", err.message);
+    const text = await res.text();
+    console.log("Raw Cal.com API response:", text);
+
+    if (!res.ok) {
+      console.error("Cal.com API error:", res.status, text);
+      return {
+        statusCode: res.status,
+        body: text
+      };
+    }
+
+    const data = JSON.parse(text);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(data)
+    };
+  } catch (error) {
+    console.error("Fetch error:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error", details: error.message })
+    };
   }
-}
-
-main();
+};
