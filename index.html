@@ -214,34 +214,57 @@
 
     <p class="note"><strong>Sibling discount of</strong> 10% can be applied upon request.</p>
 <h1>Available Times</h1>
-  <div id="calendar"></div>
+<div id="calendar"></div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', async function () {
-      const calendarEl = document.getElementById('calendar');
+<script>
+  document.addEventListener('DOMContentLoaded', async function () {
+    const calendarEl = document.getElementById('calendar');
 
-      const res = await fetch('/.netlify/functions/get-availability');
-      const data = await res.json();
+    const payload = {
+      username: 'rebeccamiller',
+      eventTypeSlug: '60min-check',
+      start: new Date().toISOString().slice(0, 10),  // today's date in YYYY-MM-DD
+      end: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().slice(0, 10),  // 14 days from now
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Chicago',
+    };
 
-      // Convert Cal.com slots to FullCalendar events
-      const events = data.slots.map(slot => ({
-        title: "Available",
-        start: slot.start,
-        end: slot.end,
-        display: 'background' // shows as non-interactive
-      }));
-
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        events,
-        selectable: false,
-        editable: false,
-        eventClick: () => {} // disables booking
-      });
-
-      calendar.render();
+    const res = await fetch('/.netlify/functions/get-availability', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
-  </script>
+
+    if (!res.ok) {
+      console.error('Error fetching availability', await res.text());
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.slots) {
+      console.error('No slots returned', data);
+      return;
+    }
+
+    // Convert Cal.com slots to FullCalendar events
+    const events = data.slots.map(slot => ({
+      title: "Available",
+      start: slot.start,
+      end: slot.end,
+      display: 'background' // shows as non-interactive
+    }));
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events,
+      selectable: false,
+      editable: false,
+      eventClick: () => {} // disables booking
+    });
+
+    calendar.render();
+  });
+</script>
     <div class="faq-section">
   <h2>Frequently Asked Questions</h2>
   <div class="faq-container">
