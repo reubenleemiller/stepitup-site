@@ -1,5 +1,3 @@
-const fetch = require("node-fetch");
-
 exports.handler = async function (event, context) {
   console.log("Received request to get availability");
 
@@ -24,6 +22,8 @@ exports.handler = async function (event, context) {
   console.log("Sending payload:", JSON.stringify(payload, null, 2));
 
   try {
+    const fetch = (await import("node-fetch")).default;
+
     const response = await fetch("https://api.cal.com/v2/availability/slots", {
       method: "POST",
       headers: {
@@ -34,7 +34,6 @@ exports.handler = async function (event, context) {
     });
 
     const text = await response.text();
-
     console.log("Raw Cal.com API response:", text);
 
     if (!response.ok) {
