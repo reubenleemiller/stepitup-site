@@ -1,35 +1,30 @@
+const fetch = require("node-fetch");
+
 exports.handler = async function (event, context) {
-  const fetch = global.fetch || (await import("node-fetch")).default;
+  console.log("Received request to get availability");
 
   const API_KEY = process.env.CAL_API_KEY;
+
   if (!API_KEY) {
+    console.error("Missing CAL_API_KEY in environment variables");
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Missing CAL_API_KEY env variable" }),
+      body: JSON.stringify({ error: "Server misconfigured: missing API key" }),
     };
   }
-
-  if (event.httpMethod !== "GET" && event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method Not Allowed" }),
-    };
-  }
-
-  const start = "2025-06-21";
-  const end = "2025-07-05";
-  const timeZone = "America/Chicago";
 
   const payload = {
     username: "rebeccamiller",
     eventTypeSlug: "60min-check",
-    start,
-    end,
-    timeZone,
+    start: "2025-06-21",
+    end: "2025-07-05",
+    timeZone: "America/Chicago",
   };
 
+  console.log("Sending payload:", JSON.stringify(payload, null, 2));
+
   try {
-    const response = await fetch("https://api.cal.com/v2/slots", {
+    const response = await fetch("https://api.cal.com/v2/availability/slots", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${API_KEY}`,
@@ -39,6 +34,7 @@ exports.handler = async function (event, context) {
     });
 
     const text = await response.text();
+
     console.log("Raw Cal.com API response:", text);
 
     if (!response.ok) {
@@ -54,15 +50,12 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 200,
       body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
     };
   } catch (error) {
-    console.error("Fetch error:", error);
+    console.error("Exception thrown while calling Cal.com API:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Internal server error" }),
+      body: JSON.stringify({ error: "Internal server error", details: error.message }),
     };
   }
 };
