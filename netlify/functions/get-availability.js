@@ -1,67 +1,48 @@
-exports.handler = async function (event, context) {
-  console.log("Received request to get availability");
+export async function handler(event) {
+  const { username, eventTypeSlug, start, end, timeZone } = JSON.parse(event.body);
 
-  const fetch = (...args) =>
-    import('node-fetch').then(({ default: fetch }) => fetch(...args));
+  console.log('Received request to get availability');
 
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  const startDate = `${yyyy}-${mm}-${dd}`;
+  const baseURL = 'https://api.cal.com/v1/slots';
+  const url = new URL(baseURL);
+  url.searchParams.append('username', username);
+  url.searchParams.append('eventTypeSlug', eventTypeSlug);
+  url.searchParams.append('start', start);
+  url.searchParams.append('end', end);
+  url.searchParams.append('timeZone', timeZone);
 
-  // Set end date 2 weeks from today (optional)
-  const endDateObj = new Date();
-  endDateObj.setDate(endDateObj.getDate() + 14);
-  const yyyyEnd = endDateObj.getFullYear();
-  const mmEnd = String(endDateObj.getMonth() + 1).padStart(2, '0');
-  const ddEnd = String(endDateObj.getDate()).padStart(2, '0');
-  const endDate = `${yyyyEnd}-${mmEnd}-${ddEnd}`;
+  console.log('Constructed URL:', url.toString());
 
-  // Use query params instead of body for GET
-  const params = new URLSearchParams({
-    username: 'rebeccamiller',
-    eventTypeSlug: '60min-check',
-    start: startDate,
-    end: endDate,
-    timeZone: 'America/Chicago'
-  });
-
-  const url = `https://api.cal.com/v2/slots?${params.toString()}`;
-
-  console.log("Constructed URL:", url);
+  const fetch = (await import('node-fetch')).default;
 
   try {
-    const res = await fetch(url, {
-      method: 'GET',
+    const response = await fetch(url.toString(), {
       headers: {
-        Authorization: `Bearer ${process.env.CAL_API_KEY}`
-      }
+        Authorization: `Bearer ${process.env.CAL_API_KEY}`,
+        Accept: 'application/json',
+      },
     });
+    const data = await response.json();
 
-    const text = await res.text();
-    console.log("Raw Cal.com API response:", text);
+    console.log('Raw Cal.com API response:', JSON.stringify(data));
 
-    if (!res.ok) {
-      console.error("Cal.com API error:", res.status, text);
+    if (!response.ok) {
+      console.error('Cal.com API error:', response.status, data);
       return {
-        statusCode: res.status,
-        body: text
+        statusCode: response.status,
+        body: JSON.stringify({ error: data }),
       };
     }
 
-    const data = JSON.parse(text);
-
     return {
       statusCode: 200,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     };
   } catch (error) {
-    console.error("Fetch error:", error);
+    console.error('Fetch error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error", details: error.message })
+      body: JSON.stringify({ error: 'Internal Server Error' }),
     };
   }
-};
+}
