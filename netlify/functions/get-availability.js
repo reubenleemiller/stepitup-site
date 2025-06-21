@@ -1,9 +1,17 @@
 exports.handler = async function (event, context) {
-  const fetch = (await import("node-fetch")).default;  // dynamic import for ESM
-
+  const fetch = (await import("node-fetch")).default;
   const API_KEY = process.env.CAL_API_KEY;
 
+  // Accept start param from query string for flexibility
   const start = event.queryStringParameters?.start || new Date().toISOString().split("T")[0];
+
+  // You can check the HTTP method if you want
+  if (event.httpMethod !== "GET" && event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" }),
+    };
+  }
 
   const query = `
     query {
@@ -40,6 +48,7 @@ exports.handler = async function (event, context) {
     }
 
     const json = await response.json();
+
     return {
       statusCode: 200,
       body: JSON.stringify(json.data.availability),
