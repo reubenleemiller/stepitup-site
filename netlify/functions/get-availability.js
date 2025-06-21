@@ -11,26 +11,27 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const payload = {
+  const params = {
     username: "rebeccamiller",
-    eventTypeSlug: "60min-check",
+    eventType: "60min-check",
     start: "2025-06-21",
     end: "2025-07-05",
     timeZone: "America/Chicago",
   };
 
-  console.log("Sending payload:", JSON.stringify(payload, null, 2));
+  const query = new URLSearchParams(params).toString();
+  const url = `https://api.cal.com/v2/availability?${query}`;
+
+  console.log("Constructed URL:", url);
 
   try {
     const fetch = (await import("node-fetch")).default;
 
-    const response = await fetch("https://api.cal.com/v2/availability/slots", {
-      method: "POST",
+    const response = await fetch(url, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
     });
 
     const text = await response.text();
